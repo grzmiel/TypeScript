@@ -325,6 +325,10 @@ namespace ts {
         return file.externalModuleIndicator !== undefined;
     }
 
+    export function isReferencedFile(file: SourceFile): boolean {
+        return (file.flags & NodeFlags.ReferencedFile) !== 0;
+    }
+
     export function isDeclarationFile(file: SourceFile): boolean {
         return (file.flags & NodeFlags.DeclarationFile) !== 0;
     }
@@ -1726,10 +1730,13 @@ namespace ts {
 
     export function shouldEmitToOwnFile(sourceFile: SourceFile, compilerOptions: CompilerOptions): boolean {
         if (!isDeclarationFile(sourceFile)) {
-            if ((isExternalModule(sourceFile) || !compilerOptions.out)) {
-                // 1. in-browser single file compilation scenario
-                // 2. non .js file
-                return compilerOptions.isolatedModules || !fileExtensionIs(sourceFile.fileName, ".js");
+            if (!compilerOptions.noReferencedCompile || !isReferencedFile(sourceFile)) {
+                if ((isExternalModule(sourceFile) || !compilerOptions.out)) {
+                    // 1. in-browser single file compilation scenario
+                    // 2. non .js file
+                    return compilerOptions.isolatedModules || !fileExtensionIs(sourceFile.fileName, ".js");
+                }
+                return false;
             }
             return false;
         }

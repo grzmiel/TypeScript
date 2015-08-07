@@ -215,7 +215,7 @@ var compilerFilename = "tsc.js";
     * @param keepComments: false to compile using --removeComments
     * @param callback: a function to execute after the compilation process ends
     */
-function compileFile(outFile, sources, prereqs, prefixes, useBuiltCompiler, noOutFile, generateDeclarations, outDir, preserveConstEnums, keepComments, noResolve, stripInternal, callback) {
+function compileFile(outFile, sources, prereqs, prefixes, useBuiltCompiler, noOutFile, generateDeclarations, outDir, preserveConstEnums, keepComments, noResolve, noReferencedCompile, stripInternal, callback) {
     file(outFile, prereqs, function() {
         var dir = useBuiltCompiler ? builtLocalDirectory : LKGDirectory;
         var options = "--module commonjs --noImplicitAny --noEmitOnError";
@@ -244,6 +244,10 @@ function compileFile(outFile, sources, prereqs, prefixes, useBuiltCompiler, noOu
 
         if(noResolve) {
             options += " --noResolve";
+        }
+
+        if(noReferencedCompile) {
+            options += " --noReferencedCompile";
         }
 
         if (useDebugMode) {
@@ -364,6 +368,7 @@ compileFile(/*outfile*/configureNightlyJs,
             /*preserveConstEnums*/ undefined,
             /*keepComments*/ false,
             /*noResolve*/ false,
+            /*noReferencedCompile*/ false,
             /*stripInternal*/ false);
 
 task("setDebugMode", function() {
@@ -401,6 +406,7 @@ compileFile(servicesFile, servicesSources,[builtLocalDirectory, copyright].conca
             /*preserveConstEnums*/ true,
             /*keepComments*/ true,
             /*noResolve*/ false,
+            /*noReferencedCompile*/ false,
             /*stripInternal*/ true,
             /*callback*/ function () {
                 jake.cpR(servicesFile, nodePackageFile, {silent: true});

@@ -1,0 +1,18 @@
+{
+    "scenario": "Reference-Reference-Compiled-When-Explicit-Before",
+    "projectRoot": "tests/cases/projects/reference-1",
+    "inputFiles": [
+        "lib\\classA.ts",
+        "lib\\classB.ts"
+    ],
+    "baselineCheck": true,
+    "resolvedInputFiles": [
+        "lib.d.ts",
+        "lib/classA.ts",
+        "lib/classB.ts"
+    ],
+    "emittedFiles": [
+        "lib/classA.js",
+        "lib/classB.js"
+    ]
+}

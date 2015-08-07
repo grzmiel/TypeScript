@@ -110,6 +110,10 @@ namespace ts {
             type: "boolean",
         },
         {
+            name: "noReferencedCompile",
+            type: "boolean",
+        },
+        {
             name: "noResolve",
             type: "boolean",
         },

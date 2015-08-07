@@ -372,7 +372,7 @@ namespace ts {
             processSourceFile(normalizePath(fileName), isDefaultLib);
         }
 
-        function processSourceFile(fileName: string, isDefaultLib: boolean, refFile?: SourceFile, refPos?: number, refEnd?: number) {
+        function processSourceFile(fileName: string, isDefaultLib: boolean, refFile?: SourceFile, refPos?: number, refEnd?: number, isReferenced?: boolean) {
             let start: number;
             let length: number;
             let diagnosticArgument: string[];
@@ -386,7 +386,7 @@ namespace ts {
                     diagnostic = Diagnostics.File_0_has_unsupported_extension_The_only_supported_extensions_are_1;
                     diagnosticArgument = [fileName, "'" + supportedExtensions.join("', '") + "'"];
                 }
-                else if (!findSourceFile(fileName, isDefaultLib, refFile, refPos, refEnd)) {
+                else if (!findSourceFile(fileName, isDefaultLib, refFile, refPos, refEnd, isReferenced)) {
                     diagnostic = Diagnostics.File_0_not_found;
                     diagnosticArgument = [fileName];
                 }
@@ -396,13 +396,13 @@ namespace ts {
                 }
             }
             else {
-                let nonTsFile: SourceFile = options.allowNonTsExtensions && findSourceFile(fileName, isDefaultLib, refFile, refPos, refEnd);
+                let nonTsFile: SourceFile = options.allowNonTsExtensions && findSourceFile(fileName, isDefaultLib, refFile, refPos, refEnd, isReferenced);
                 if (!nonTsFile) {
                     if (options.allowNonTsExtensions) {
                         diagnostic = Diagnostics.File_0_not_found;
                         diagnosticArgument = [fileName];
                     }
-                    else if (!forEach(supportedExtensions, extension => findSourceFile(fileName + extension, isDefaultLib, refFile, refPos, refEnd))) {
+                    else if (!forEach(supportedExtensions, extension => findSourceFile(fileName + extension, isDefaultLib, refFile, refPos, refEnd, isReferenced))) {
                         diagnostic = Diagnostics.File_0_not_found;
                         fileName += ".ts";
                         diagnosticArgument = [fileName];
@@ -421,17 +421,17 @@ namespace ts {
         }
 
         // Get source file from normalized fileName
-        function findSourceFile(fileName: string, isDefaultLib: boolean, refFile?: SourceFile, refStart?: number, refLength?: number): SourceFile {
+        function findSourceFile(fileName: string, isDefaultLib: boolean, refFile?: SourceFile, refStart?: number, refLength?: number, isReferenced?: boolean): SourceFile {
             let canonicalName = host.getCanonicalFileName(normalizeSlashes(fileName));
             if (filesByName.contains(canonicalName)) {
                 // We've already looked for this file, use cached result
-                return getSourceFileFromCache(fileName, canonicalName, /*useAbsolutePath*/ false);
+                return getSourceFileFromCache(fileName, canonicalName, /*useAbsolutePath*/ false, isReferenced);
             }
             else {
                 let normalizedAbsolutePath = getNormalizedAbsolutePath(fileName, host.getCurrentDirectory());
                 let canonicalAbsolutePath = host.getCanonicalFileName(normalizedAbsolutePath);
                 if (filesByName.contains(canonicalAbsolutePath)) {
-                    return getSourceFileFromCache(normalizedAbsolutePath, canonicalAbsolutePath, /*useAbsolutePath*/ true);
+                    return getSourceFileFromCache(normalizedAbsolutePath, canonicalAbsolutePath, /*useAbsolutePath*/ true, isReferenced);
                 }
 
                 // We haven't looked for this file, do so now and cache result
@@ -446,6 +446,10 @@ namespace ts {
                 });
                 filesByName.set(canonicalName, file);
                 if (file) {
+                    if (isReferenced) {
+                        file.flags |= NodeFlags.ReferencedFile;
+                    }
+
                     skipDefaultLib = skipDefaultLib || file.hasNoDefaultLib;
 
                     // Set the source file for normalized absolute path
@@ -468,7 +472,7 @@ namespace ts {
                 return file;
             }
 
-            function getSourceFileFromCache(fileName: string, canonicalName: string, useAbsolutePath: boolean): SourceFile {
+            function getSourceFileFromCache(fileName: string, canonicalName: string, useAbsolutePath: boolean, isReferenced?: boolean): SourceFile {
                 let file = filesByName.get(canonicalName);
                 if (file && host.useCaseSensitiveFileNames()) {
                     let sourceFileName = useAbsolutePath ? getNormalizedAbsolutePath(file.fileName, host.getCurrentDirectory()) : file.fileName;
@@ -477,6 +481,9 @@ namespace ts {
                             Diagnostics.File_name_0_differs_from_already_included_file_name_1_only_in_casing, fileName, sourceFileName));
                     }
                 }
+                if (file && !isReferenced) {
+                    file.flags &= ~NodeFlags.ReferencedFile;
+                }
                 return file;
             }
         }
@@ -484,7 +491,7 @@ namespace ts {
         function processReferencedFiles(file: SourceFile, basePath: string) {
             forEach(file.referencedFiles, ref => {
                 let referencedFileName = isRootedDiskPath(ref.fileName) ? ref.fileName : combinePaths(basePath, ref.fileName);
-                processSourceFile(normalizePath(referencedFileName), /* isDefaultLib */ false, file, ref.pos, ref.end);
+                processSourceFile(normalizePath(referencedFileName), /* isDefaultLib */ false, file, ref.pos, ref.end, true);
             });
         }
 

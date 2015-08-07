@@ -18,6 +18,7 @@ interface ProjectRunnerTestCase {
     runTest?: boolean; // Run the resulting test
     bug?: string; // If there is any bug associated with this test case
     noResolve?: boolean;
+    noReferencedCompile?: boolean;
     rootDir?: string; // --rootDir
 }
 
@@ -164,6 +165,7 @@ class ProjectRunner extends RunnerBase {
                     sourceRoot: testCase.resolveSourceRoot && testCase.sourceRoot ? ts.sys.resolvePath(testCase.sourceRoot) : testCase.sourceRoot,
                     module: moduleKind,
                     noResolve: testCase.noResolve,
+                    noReferencedCompile: testCase.noReferencedCompile,
                     rootDir: testCase.rootDir
                 };
             }

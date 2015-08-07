@@ -1,0 +1,10 @@
+{
+    "scenario": "Reference-Reference-Compiled-When-Expliecit-After",
+    "projectRoot": "tests/cases/projects/reference-1",
+    "inputFiles": [
+        "lib\\classB.ts",
+        "lib\\classA.ts"
+    ],
+    "noReferencedCompile": true,
+    "baselineCheck": true
+}

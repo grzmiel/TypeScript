@@ -375,6 +375,7 @@ namespace ts {
         OctalLiteral =      0x00010000,  // Octal numeric literal
         Namespace =         0x00020000,  // Namespace declaration
         ExportContext =     0x00040000,  // Export context (initialized by binding)
+        ReferencedFile =    0x00080000,  // Node is file included by reference
 
         Modifier = Export | Ambient | Public | Private | Protected | Static | Abstract | Default | Async,
         AccessibilityModifier = Public | Private | Protected,
@@ -2012,6 +2013,7 @@ namespace ts {
         noErrorTruncation?: boolean;
         noImplicitAny?: boolean;
         noLib?: boolean;
+        noReferencedCompile?: boolean;
         noResolve?: boolean;
         out?: string;
         outDir?: string;

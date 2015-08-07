@@ -1011,7 +1011,7 @@ module Harness {
                 
                 function setCompilerOptionForSetting(setting: Harness.TestCaseParser.CompilerSetting) {
                     switch (setting.flag.toLowerCase()) {
-                        // "fileName", "comments", "declaration", "module", "nolib", "sourcemap", "target", "out", "outdir", "noimplicitany", "noresolve"
+                        // "fileName", "comments", "declaration", "module", "nolib", "sourcemap", "target", "out", "outdir", "noimplicitany", "noresolve", "noReferencedCompile"
                         case "module":
                         case "modulegentarget":
                             if (typeof setting.value === "string") {
@@ -1068,6 +1068,10 @@ module Harness {
 
                         case "noemitonerror":
                             options.noEmitOnError = setting.value === "true";
+                            break;
+
+                        case "noReferencedCompile":
+                            options.noReferencedCompile = setting.value === "true";
                             break;
 
                         case "noresolve":
@@ -1523,7 +1527,7 @@ module Harness {
             "includebuiltfile", "suppressimplicitanyindexerrors", "stripinternal",
             "isolatedmodules", "inlinesourcemap", "maproot", "sourceroot",
             "inlinesources", "emitdecoratormetadata", "experimentaldecorators",
-            "skipdefaultlibcheck", "jsx"];
+            "skipdefaultlibcheck", "jsx", "noReferencedCompile"];
 
         function extractCompilerSettings(content: string): CompilerSetting[] {
 

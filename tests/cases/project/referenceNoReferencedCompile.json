@@ -1,0 +1,9 @@
+{
+    "scenario": "Reference-No-Reference-Compiled",
+    "projectRoot": "tests/cases/projects/reference-1",
+    "inputFiles": [
+        "lib\\classB.ts"
+    ],
+    "noReferencedCompile": true,
+    "baselineCheck": true
+}
